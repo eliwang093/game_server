@@ -1,4 +1,4 @@
-<?php
+<?php 
 namespace VanguardLTE
 {
     class BonusPreset extends \Illuminate\Database\Eloquent\Model
@@ -9,4 +9,5 @@ namespace VanguardLTE
             parent::boot();
         }
     }
+
 }
