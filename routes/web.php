@@ -145,7 +145,10 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
     Route::get('setpage.json', ['as' => 'frontend.category.setpage', 'uses' => 'GamesController@setpage']);
 
     Route::get('game/{game}', ['as' => 'frontend.game.go', 'uses' => 'GamesController@go']);
+
     Route::post('game/{game}/server', ['as' => 'frontend.game.server', 'uses' => 'GamesController@server']);
+
+    Route::get('game/{game}/get_server', ['as' => 'frontend.game.get_server', 'uses' => 'GamesController@get_server']);
 
     Route::get('game/{game}/{prego}', ['as' => 'frontend.game.go.prego', 'uses' => 'GamesController@go']);
 

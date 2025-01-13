@@ -2,6 +2,7 @@
 
 namespace VanguardLTE\Http\Controllers\Web\Frontend {
 
+    use Illuminate\Support\Facades\Auth;
     use Illuminate\Support\Facades\Log;
 
     include_once(base_path() . '/app/ShopCore.php');
@@ -14,6 +15,7 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
             if (\Illuminate\Support\Facades\Auth::check() && !auth()->user()->hasRole('user')) {
                 return redirect()->route('backend.dashboard');
             }
+
             if (!\Illuminate\Support\Facades\Auth::check() && false) {
                 return redirect()->route('frontend.auth.login');
             }
@@ -40,6 +42,7 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
                 return $redirect;
             }
             \Illuminate\Support\Facades\Cookie::queue('currentCategory' . (\Illuminate\Support\Facades\Auth::check() ? auth()->user()->id : 0), $category1, 2678400);
+
             if ($category1 != '') {
                 $cat1 = \VanguardLTE\Category::where(['href' => $category1])->first();
                 if (!$cat1 && !in_array($category1, [
@@ -834,6 +837,8 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
             $slot = new $object($game->name, $userId);
             $is_api = false;
 
+            $user = \VanguardLTE\User::find($userId);
+
             return view('frontend.games.list.' . $game->name, compact('slot', 'game', 'is_api'));
         }
 
@@ -1052,6 +1057,7 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
                 echo '{"responseEvent":"error","responseType":"start","serverResponse":"User not Authorized"}';
                 exit();
             }
+
             $subssession = \VanguardLTE\Subsession::where([
                 'subsession' => $request->sessionId,
                 'user_id' => auth()->user()->id
@@ -1066,13 +1072,53 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
                     exit();
                 }
             }
+
             if (!$subssession) {
                 $subssession = \VanguardLTE\Subsession::create([
                     'subsession' => $request->sessionId,
                     'user_id' => auth()->user()->id
                 ]);
             }
+
             \VanguardLTE\Subsession::where('id', '!=', $subssession->id)->where('user_id', auth()->user()->id)->update(['active' => 0]);
+            $object = '\VanguardLTE\Games\\' . $game . '\Server';
+            $server = new $object();
+            echo $server->get($request, $game, auth()->user()->id);
+        }
+
+        public function get_server(\Illuminate\Http\Request $request, $game)
+        {
+            if (\Illuminate\Support\Facades\Auth::check() && !auth()->user()->hasRole('user')) {
+                echo '{"responseEvent":"error","responseType":"start","serverResponse":"Wrong User"}';
+                exit();
+            }
+            if (!\Illuminate\Support\Facades\Auth::check()) {
+                echo '{"responseEvent":"error","responseType":"start","serverResponse":"User not Authorized"}';
+                exit();
+            }
+
+            $subssession = \VanguardLTE\Subsession::where([
+                'subsession' => $request->sessionId,
+                'user_id' => auth()->user()->id
+            ])->orderBy('created_at', 'desc')->first();
+            if (settings('check_active_tab')) {
+                if (!$request->sessionId) {
+                    echo '{"responseEvent":"error","responseType":"start","serverResponse":"Wrong sessionId"}';
+                    exit();
+                }
+                if ($subssession && !$subssession->active) {
+                    echo '{"responseEvent":"error","responseType":"error","serverResponse":"Wrong sessionId"}';
+                    exit();
+                }
+            }
+//            if (!$subssession) {
+//                $subssession = \VanguardLTE\Subsession::create([
+//                    'subsession' => $request->sessionId,
+//                    'user_id' => auth()->user()->id
+//                ]);
+//            }
+//            Log::info('555');
+//            \VanguardLTE\Subsession::where('id', '!=', $subssession->id)->where('user_id', auth()->user()->id)->update(['active' => 0]);
             $object = '\VanguardLTE\Games\\' . $game . '\Server';
             $server = new $object();
             echo $server->get($request, $game, auth()->user()->id);

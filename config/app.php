@@ -62,7 +62,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'https://loftbett.com'),
+    'url' => env('APP_URL', 'https://betshop.io'),
 
     /*
     |--------------------------------------------------------------------------
@@ -194,9 +194,9 @@ return [
         VanguardLTE\Providers\RouteServiceProvider::class,
 
         VanguardLTE\Providers\SMSToServiceProvider::class,
-
+		
 		jeremykenedy\LaravelRoles\RolesServiceProvider::class,
-
+		
         Yajra\DataTables\DataTablesServiceProvider::class,
 
 
